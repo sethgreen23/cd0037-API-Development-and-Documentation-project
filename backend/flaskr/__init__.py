@@ -1,5 +1,7 @@
 import os
+import json
 from tracemalloc import start
+from winreg import QueryInfoKey
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -30,7 +32,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    CORS(app, resources={r"/*": {"origin":"*"}})
+    CORS(app, resources={r"/*": {"origins":"*"}})
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
@@ -44,15 +46,14 @@ def create_app(test_config=None):
     Create an endpoint to handle GET requests
     for all available categories.
     """
-    @app.route("/categories")
-    def retrieve_categories():
+    @app.route("/categories", methods=["GET"])
+    def retrieve_all_categories():
         categories = Category.query.order_by(Category.type).all()
-        
         if len(categories) == 0:
             abort(404)
         
         return jsonify({
-            'success' : True,
+            'success':True,
             'categories' : format_categories(categories)
         })
 
@@ -68,7 +69,26 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
-    
+    @app.route("/questions", methods=['GET'])
+    def retrieve_paginated_questions():
+        questions = Question.query.order_by(Question.id).all()
+        
+        categories = Category.query.order_by(Category.type).all()
+
+        questions_format = paginate_questions(request, questions)
+        
+        if len(questions_format) == 0:
+            abort(404)
+
+        return jsonify({
+            'success':True,
+            'questions': questions_format,
+            'totalQuestions':len(questions),
+            'categories': format_categories(categories),
+            'currentCategory':categories[0].type
+        })
+        
+
     """
     @TODO:
     Create an endpoint to DELETE question using a question ID.
@@ -76,7 +96,20 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
-
+    @app.route('/questions/<question_id>',methods=['DELETE'])
+    def delete_question(question_id):
+        try:
+            question = Question.query.filter(Question.id==question_id).one_or_none()
+            print(question)
+            if question is None:
+                abort(404)
+            question.delete()
+            return jsonify({
+                'success':True
+            })
+        except:
+            abort(422)
+        
     """
     @TODO:
     Create an endpoint to POST a new question,
@@ -87,7 +120,7 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-
+    
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
