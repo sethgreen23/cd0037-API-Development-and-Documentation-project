@@ -27,9 +27,9 @@ class QuestionView extends Component {
       success: (result) => {
         this.setState({
           questions: result.questions,
-          totalQuestions: result.totalQuestions,
+          totalQuestions: result.total_questions,
           categories: result.categories,
-          currentCategory: result.currentCategory,
+          currentCategory: result.current_category,
         });
         console.log(this.state);
         return;

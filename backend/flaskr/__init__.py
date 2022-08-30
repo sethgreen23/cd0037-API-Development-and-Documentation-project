@@ -13,7 +13,7 @@ QUESTIONS_PER_PAGE = 10
 
 def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
-    start = (page-1) * QUESTIONS_PER_PAGE
+    start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
     questions = [question.format() for question in selection]
@@ -83,9 +83,9 @@ def create_app(test_config=None):
         return jsonify({
             'success':True,
             'questions': questions_format,
-            'totalQuestions':len(questions),
+            'total_questions':len(questions),
             'categories': format_categories(categories),
-            'currentCategory':categories[0].type
+            'current_category':None
         })
         
 
@@ -123,14 +123,17 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def add_new_question():
         body = request.get_json()
+        if not('question' in body and 'answer' in body and 'category' in body and 'difficulty' in body):
+            abort(422)
 
-        new_question = body.get('question')
-        new_answer = body.get('answer')
-        new_category = body.get('category')
-        new_difficulty = body.get('difficulty')
+        question = body.get('question')
+        answer = body.get('answer')
+        category = body.get('category')
+        difficulty = body.get('difficulty')
 
         try:
-            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+                                
+            question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
             question.insert()
 
             return jsonify({
