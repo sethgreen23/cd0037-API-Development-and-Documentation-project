@@ -164,7 +164,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-        
+    #Done in the previous function
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
@@ -173,6 +173,25 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<categorie_id>/questions', methods=['GET'])
+    def retrieve_questions_by_categories(categorie_id):
+        questions_by_category = Question.query.order_by(Question.id).filter(Question.category==categorie_id).all()
+        
+        if len(questions_by_category)==0:
+            abort(404)
+
+        totalQuestions = len(questions_by_category)
+        currentCategory = Category.query.filter_by(id=categorie_id).one_or_none()
+        if currentCategory:
+            currentCategory = currentCategory.type
+        questions_by_category_format = paginate_questions(request,questions_by_category)
+
+        return jsonify({
+            'success':True,
+            'questions':questions_by_category_format,
+            'total_questions':totalQuestions,
+            'current_category': currentCategory
+        }) 
 
     """
     @TODO:
