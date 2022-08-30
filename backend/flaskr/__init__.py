@@ -121,24 +121,37 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     """
     @app.route('/questions', methods=['POST'])
-    def add_new_question():
+    def add_search_question():
         body = request.get_json()
-        if not('question' in body and 'answer' in body and 'category' in body and 'difficulty' in body):
-            abort(422)
-
-        question = body.get('question')
-        answer = body.get('answer')
-        category = body.get('category')
-        difficulty = body.get('difficulty')
-
+        question = body.get('question', None)
+        answer = body.get('answer', None)
+        category = body.get('category',None)
+        difficulty = body.get('difficulty',None)
+        searchTerm = body.get('searchTerm',None)
+        
         try:
-                                
-            question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
-            question.insert()
+            if searchTerm:
 
-            return jsonify({
-                'success':True
-            })
+                questions_selection = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(searchTerm))).all()
+                if len(questions_selection)==0:
+                    abort(404)
+                totalQuestion = len(questions_selection)
+                currentCategory = None
+                current_questions_list = paginate_questions(request, questions_selection)
+                return jsonify({
+                    'success':True,
+                    'questions':current_questions_list,
+                    'total_questions':totalQuestion,
+                    'current_category':currentCategory
+                })
+            else:
+                                        
+                    question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+                    question.insert()
+
+                    return jsonify({
+                        'success':True
+                    })
         except:
             abort(422)
     """
@@ -151,7 +164,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-
+        
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
