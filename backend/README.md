@@ -67,13 +67,9 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 8. Create a `POST` endpoint to get questions to play the quiz. This endpoint should take a category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions.
 9. Create error handlers for all expected errors including 400, 404, 422, and 500.
 
-## Documenting your Endpoints
+### Documentation
 
-You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
-
-### Documentation Example
-
-`GET '/api/v1.0/categories'`
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
@@ -81,12 +77,156 @@ You will need to provide detailed documentation of your API endpoints including 
 
 ```json
 {
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "success": true
+}
+```
+
+`GET '/questions'`
+
+- Fetch a dictionary of all available questions of all categories paginated (10 questions per page)
+- Request Arguments which is optional indicates the number of current page: page
+- Return: An object with respective keys "categories", "current_category", "questions", "total_questions" and "success"
+
+```json
+{
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "success": true,
+  "current_category": null,
+  "total_questions": 2,
+  "questions": [
+    {
+      "id": 1,
+      "question": "How long does it take to hard boil an egg?",
+      "answer": "Seven minutes",
+      "category": 1,
+      "difficulty": 1
+    },
+    {
+      "id": 1,
+      "question": "How many rides are at Disney World?",
+      "answer": "46",
+      "category": 5,
+      "difficulty": 3
+    }
+  ]
+}
+```
+
+`DELETE '/questions/<question_id>'`
+
+- DELETE an existing question from the available questions in the database
+- Request Arguments : question_id
+- Return: An object with unique key "success"
+
+```json
+{
+  "success": true
+}
+```
+
+`POST '/questions'`
+
+- Fetches a dictionary of all availlable question related to a spacific string pattern
+- Request Arguments :{'searchTerm':string}
+- Return: An object with respective keys "success", "current_category", "total_questions" and "questions"
+
+```json
+{
+  "success": true,
+  "current_category": null,
+  "total_questions": 2,
+  "questions": [
+    {
+      "id": 1,
+      "question": "How long does it take to hard boil an egg?",
+      "answer": "Seven minutes",
+      "category": 1,
+      "difficulty": 1
+    },
+    {
+      "id": 1,
+      "question": "How many rides are at Disney World?",
+      "answer": "46",
+      "category": 5,
+      "difficulty": 3
+    }
+  ]
+}
+```
+
+`POST '/questions'`
+
+- Add a new question to the database
+- Request Arguments :{'question':string, 'answer':string, 'difficulty':int, 'category':int}
+- Return: An object with unique key "success"
+
+```json
+{
+  "success": true
+}
+```
+
+`GET '/categories/<category_id>/questions'`
+
+- Fetch a dictionary of all available questions for a specifc category
+- Request Arguments :category_id
+- Return: An object with respective keys "success", "questions", "total_questions" and "current_category"
+
+```json
+{
+  "success": true,
+  "current_category": 1,
+  "total_questions": 2,
+  "questions": [
+    {
+      "id": 1,
+      "question": "How long does it take to hard boil an egg?",
+      "answer": "Seven minutes",
+      "category": 1,
+      "difficulty": 1
+    },
+    {
+      "id": 1,
+      "question": "What’s the hardest rock?",
+      "answer": "A diamond",
+      "category": 5,
+      "difficulty": 3
+    }
+  ]
+}
+```
+
+`POST '/quizzes'`
+
+- Fetch one random question from a specific category.We dont pick up an already asked question.When we go throw all the question a None question is returned that ends the game and show the final score.
+- Request Arguments :{'previous_questions':string, 'quiz_category': {id:int, type:string}}
+- Return: An object with respective keys "success" and "question"
+
+```json
+{
+  "success": true,
+  "question": {
+    "id": 1,
+    "question": "What’s the hardest rock?",
+    "answer": "A diamond",
+    "category": 5,
+    "difficulty": 3
+  }
 }
 ```
 
